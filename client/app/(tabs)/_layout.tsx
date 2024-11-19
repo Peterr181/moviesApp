@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { HomeIcon, MoviesIcon, UsersIcon } from "../../constants/icons";
 
 const Tab = createBottomTabNavigator();
@@ -28,7 +27,7 @@ export default function TabLayout() {
               headerShown: false,
             }}
           >
-            <Stack.Screen name="index" options={{ title: "Home" }} />
+            <Stack.Screen name="home" options={{ title: "Home" }} />
           </Stack>
         )}
       </Tab.Screen>

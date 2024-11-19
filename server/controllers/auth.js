@@ -12,10 +12,16 @@ export const signup = async (req, res) => {
   const { email, username, password } = req.body;
 
   try {
+    console.log("Signup request received:", { email, username, password });
+
     const existingUser = await User.findOne({ email });
-    if (existingUser) return handleError(res, 400, "Email already registered");
+    if (existingUser) {
+      console.log("Email already registered:", email);
+      return handleError(res, 400, "Email already registered");
+    }
 
     const hash = await bcrypt.hash(password.toString(), saltRounds);
+    console.log("Password hashed successfully");
 
     const newUser = new User({
       email,
@@ -24,12 +30,14 @@ export const signup = async (req, res) => {
     });
 
     const savedUser = await newUser.save();
+    console.log("User saved successfully:", savedUser);
 
     const token = jwt.sign(
       { id: savedUser._id, username: savedUser.username },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
+    console.log("JWT token generated:", token);
 
     return res.status(200).json({
       status: "Success",
@@ -37,6 +45,7 @@ export const signup = async (req, res) => {
       token,
     });
   } catch (err) {
+    console.error("Error during signup:", err);
     return handleError(res, 500, "Internal Server Error");
   }
 };

@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { useAuth } from "../../hooks/useAuth"; // Adjust the import path as necessary
 
 // Define the type for your navigation routes
 type RootStackParamList = {
@@ -16,6 +17,7 @@ type RootStackParamList = {
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { signOut, userProfile } = useAuth();
 
   return (
     <ImageBackground
@@ -24,6 +26,17 @@ export default function HomeScreen() {
       }} // Replace with your own background image URL
       style={styles.background}
     >
+      <View style={styles.headerContainer}>
+        {userProfile && (
+          <View style={styles.userInfo}>
+            <Text style={styles.userInfoText}>{userProfile.username}</Text>
+            <Text style={styles.userInfoText}>({userProfile.role})</Text>
+          </View>
+        )}
+        <TouchableOpacity onPress={signOut}>
+          <Text style={styles.headerButtonText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
       <ScrollView contentContainerStyle={styles.container}>
         {/* Welcome Section */}
         <View style={styles.welcomeContainer}>
@@ -137,5 +150,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     textAlign: "center",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 20,
+    marginRight: 10,
+  },
+  headerButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  userInfoText: {
+    color: "#fff",
+    fontSize: 16,
+    marginRight: 10,
   },
 });

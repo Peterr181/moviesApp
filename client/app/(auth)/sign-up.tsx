@@ -1,7 +1,8 @@
-// apps/(auth)/sign-up.tsx
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+
+import { useAuth } from "../../hooks/useAuth";
 
 export default function SignUpScreen() {
   const router = useRouter();
@@ -9,9 +10,10 @@ export default function SignUpScreen() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { signUp, loading, error } = useAuth();
 
   const handleSignUp = () => {
-    router.replace("sign-in");
+    signUp(firstName, lastName, email, password);
   };
 
   return (
@@ -43,7 +45,8 @@ export default function SignUpScreen() {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Sign Up" onPress={handleSignUp} />
+      {error && <Text style={styles.error}>{error}</Text>}
+      <Button title="Sign Up" onPress={handleSignUp} disabled={loading} />
       <Text style={styles.link} onPress={() => router.push("sign-in")}>
         Already have an account? Sign In
       </Text>
@@ -74,5 +77,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#007bff",
     textAlign: "center",
+  },
+  error: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
   },
 });

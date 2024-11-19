@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import axios from "axios";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function SignInScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { signIn, loading, error } = useAuth();
 
   const handleSignIn = () => {
-    console.log("Email:", email, "Password:", password);
+    signIn(email, password);
   };
 
   return (
@@ -28,7 +31,8 @@ export default function SignInScreen() {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Sign In" onPress={handleSignIn} />
+      {error && <Text style={styles.error}>{error}</Text>}
+      <Button title="Sign In" onPress={handleSignIn} disabled={loading} />
       <Text
         style={styles.link}
         onPress={() => router.push("sign-up")} // Navigate to the sign-up screen
@@ -62,5 +66,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "#007bff",
     textAlign: "center",
+  },
+  error: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
   },
 });
