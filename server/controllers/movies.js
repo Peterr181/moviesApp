@@ -31,8 +31,10 @@ export const addMovie = async (req, res) => {
 
   try {
     const existingMovie = await Movie.findOne({ title });
-    if (existingMovie)
+    if (existingMovie) {
+      console.error("Movie with this title already exists:", title);
       return handleError(res, 400, "Movie with this title already exists");
+    }
 
     const newMovie = new Movie({
       title,
@@ -46,8 +48,10 @@ export const addMovie = async (req, res) => {
     });
 
     const savedMovie = await newMovie.save();
+    console.log("New movie added successfully:", savedMovie);
     return res.status(201).json(savedMovie);
   } catch (err) {
+    console.error("Error adding movie:", err);
     return handleError(res, 500, "Error adding movie");
   }
 };

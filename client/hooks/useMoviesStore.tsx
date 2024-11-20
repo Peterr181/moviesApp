@@ -51,11 +51,13 @@ const useMoviesStore = create<MoviesStore>((set) => ({
     set({ loading: true, error: null });
     try {
       const response = await axios.post(apiUrl, movie);
+      console.log("Movie added successfully:", response.data);
       set((state) => ({
         movies: [...state.movies, response.data],
         loading: false,
       }));
     } catch (error) {
+      console.error("Error adding movie:", error);
       if (axios.isAxiosError(error)) {
         set({ error: error.message, loading: false });
       } else {

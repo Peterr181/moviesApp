@@ -26,9 +26,9 @@ const clientSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  rentals: {
-    type: [mongoose.Schema.Types.ObjectId], // Array of rental IDs
-    ref: "Rental",
+  rented: {
+    type: Boolean,
+    default: false,
   },
 });
 

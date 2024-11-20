@@ -5,7 +5,6 @@ import {
   updateMovie,
   deleteMovie,
 } from "../controllers/movies.js";
-import { verifyToken } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 

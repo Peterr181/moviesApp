@@ -21,6 +21,7 @@ interface RentalsStore {
   fetchRentals: () => Promise<void>;
   rentMovie: (clientId: string, movieId: string) => Promise<void>;
   returnMovie: (rentalId: string) => Promise<void>;
+  fetchRentalsByClientId: (clientId: string) => Promise<void>;
 }
 
 const useRentalsStore = create<RentalsStore>((set) => ({
@@ -76,6 +77,18 @@ const useRentalsStore = create<RentalsStore>((set) => ({
       // Fetch updated movies list
       const { fetchMovies } = useMoviesStore.getState();
       await fetchMovies();
+    } catch (error) {
+      set({ error: (error as any).message, loading: false });
+    }
+  },
+  fetchRentalsByClientId: async (clientId: string) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await axios.get(`${API_URL}/rentals/client/${clientId}`);
+      set((state) => ({
+        rentals: response.data,
+        loading: false,
+      }));
     } catch (error) {
       set({ error: (error as any).message, loading: false });
     }
