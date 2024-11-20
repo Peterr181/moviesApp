@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import axios from "axios";
-import { useAuth } from "../../hooks/useAuth";
+import { useGlobalContext } from "@/context/GlobalProvider"; // Import the context
 
 export default function SignInScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, loading, error } = useAuth();
+  const { signIn, loading, error } = useGlobalContext(); // Access signIn and loading from context
 
   const handleSignIn = () => {
-    signIn(email, password);
+    signIn(email, password); // Call signIn from context
   };
 
   return (
@@ -33,10 +32,7 @@ export default function SignInScreen() {
       />
       {error && <Text style={styles.error}>{error}</Text>}
       <Button title="Sign In" onPress={handleSignIn} disabled={loading} />
-      <Text
-        style={styles.link}
-        onPress={() => router.push("sign-up")} // Navigate to the sign-up screen
-      >
+      <Text style={styles.link} onPress={() => router.push("/sign-up")}>
         Don't have an account? Sign Up
       </Text>
     </View>

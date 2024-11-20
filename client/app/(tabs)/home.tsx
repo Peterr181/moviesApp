@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { useAuth } from "../../hooks/useAuth"; // Adjust the import path as necessary
+import { useGlobalContext } from "../../context/GlobalProvider"; // Adjust the import path as necessary
 
 // Define the type for your navigation routes
 type RootStackParamList = {
@@ -17,7 +17,7 @@ type RootStackParamList = {
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { signOut, userProfile } = useAuth();
+  const { signOut, userProfile } = useGlobalContext();
 
   return (
     <ImageBackground

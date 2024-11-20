@@ -10,10 +10,10 @@ import {
   ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "@/hooks/useAuth";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const Welcome = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useGlobalContext();
   if (!loading && isAuthenticated) return <Redirect href="/home" />;
 
   return (

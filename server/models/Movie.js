@@ -15,7 +15,7 @@ const movieSchema = new mongoose.Schema({
   },
   duration: {
     type: Number,
-    required: true, // Duration in minutes
+    required: true,
   },
   rating: {
     type: Number,
@@ -28,7 +28,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
   },
   actors: {
-    type: [String], // Array of actor names
+    type: [String],
   },
   addedDate: {
     type: Date,
