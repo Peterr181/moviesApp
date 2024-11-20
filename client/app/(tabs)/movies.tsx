@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,51 +6,73 @@ import {
   StyleSheet,
   TouchableOpacity,
   ListRenderItem,
+  ActivityIndicator,
+  TextInput,
 } from "react-native";
-
-// Przykładowe dane filmów
-const movies = [
-  {
-    id: "1",
-    title: "Inception",
-    genre: "Sci-Fi",
-    director: "Christopher Nolan",
-    duration: "148 min",
-    rating: 9,
-    description:
-      "A thief who steals corporate secrets through the use of dream-sharing technology.",
-    actors: "Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page",
-    addedDate: "2020-01-01",
-  },
-  {
-    id: "2",
-    title: "The Godfather",
-    genre: "Crime",
-    director: "Francis Ford Coppola",
-    duration: "175 min",
-    rating: 10,
-    description:
-      "The aging patriarch of an organized crime dynasty transfers control to his son.",
-    actors: "Marlon Brando, Al Pacino, James Caan",
-    addedDate: "2019-06-15",
-  },
-  // Dodaj więcej filmów, aby przetestować widok
-];
+import { Picker } from "@react-native-picker/picker";
+import useMoviesStore from "../../hooks/useMoviesStore";
+import useRentalsStore from "../../hooks/useRentalsStore";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface Movie {
-  id: string;
+  _id: string;
   title: string;
   genre: string;
   director: string;
-  duration: string;
+  duration: number;
   rating: number;
   description: string;
-  actors: string;
+  actors: string[];
   addedDate: string;
+  available: boolean;
 }
 
 export default function MoviesScreen() {
+  const { movies, loading, error, fetchMovies, updateMovie } = useMoviesStore();
+  const { userProfile } = useGlobalContext();
+  const { rentMovie } = useRentalsStore();
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [search, setSearch] = useState("");
+  const [genre, setGenre] = useState("");
+  const [sortBy, setSortBy] = useState("title");
+
+  useEffect(() => {
+    fetchMovies();
+  }, [fetchMovies]);
+
+  const resetFilters = () => {
+    setSearch("");
+    setGenre("");
+    setSortBy("title");
+  };
+
+  const handleRentMovie = async (movie: Movie) => {
+    const clientId = userProfile?._id;
+
+    if (clientId) {
+      try {
+        await rentMovie(clientId, movie._id);
+        await fetchMovies(); // Fetch movies to update the list
+      } catch (error) {
+        console.error("Error renting movie:", error);
+      }
+    } else {
+      console.error("Client ID is undefined");
+    }
+  };
+
+  const filteredMovies = movies
+    .filter((movie) => movie.available)
+    .filter((movie) => movie.title.toLowerCase().includes(search.toLowerCase()))
+    .filter((movie) => (genre ? movie.genre === genre : true))
+    .sort((a, b) => {
+      if (sortBy === "title") {
+        return a.title.localeCompare(b.title);
+      } else if (sortBy === "rating") {
+        return b.rating - a.rating;
+      }
+      return 0;
+    });
 
   const renderMovie: ListRenderItem<Movie> = ({ item }) => (
     <TouchableOpacity
@@ -60,10 +82,34 @@ export default function MoviesScreen() {
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.genre}>{item.genre}</Text>
       <Text style={styles.details}>
-        {item.director} • {item.duration} • Rating: {item.rating}/10
+        {item.director} • {item.duration} min • Rating: {item.rating}/10
       </Text>
+      {item.available && (
+        <TouchableOpacity
+          style={styles.rentButton}
+          onPress={() => handleRentMovie(item)}
+        >
+          <Text style={styles.rentButtonText}>Rent</Text>
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -75,7 +121,7 @@ export default function MoviesScreen() {
             Director: {selectedMovie.director}
           </Text>
           <Text style={styles.detailsText}>
-            Duration: {selectedMovie.duration}
+            Duration: {selectedMovie.duration} min
           </Text>
           <Text style={styles.detailsText}>
             Rating: {selectedMovie.rating}/10
@@ -83,9 +129,11 @@ export default function MoviesScreen() {
           <Text style={styles.detailsText}>
             Description: {selectedMovie.description}
           </Text>
-          <Text style={styles.detailsText}>Actors: {selectedMovie.actors}</Text>
           <Text style={styles.detailsText}>
-            Added: {selectedMovie.addedDate}
+            Actors: {selectedMovie.actors.join(", ")}
+          </Text>
+          <Text style={styles.detailsText}>
+            Added: {new Date(selectedMovie.addedDate).toLocaleDateString()}
           </Text>
           <TouchableOpacity
             onPress={() => setSelectedMovie(null)}
@@ -95,12 +143,49 @@ export default function MoviesScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <FlatList
-          data={movies}
-          renderItem={renderMovie}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-        />
+        <View>
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search by title"
+              value={search}
+              onChangeText={setSearch}
+            />
+            <Picker
+              selectedValue={genre}
+              style={styles.picker}
+              onValueChange={(itemValue) => {
+                setGenre(itemValue);
+                if (itemValue === "") {
+                  resetFilters();
+                }
+              }}
+            >
+              <Picker.Item label="All Genres" value="" />
+              <Picker.Item label="Sci-Fi" value="Sci-Fi" />
+              <Picker.Item label="Crime" value="Crime" />
+              <Picker.Item label="Action" value="Action" />
+              {/* Add more genres as needed */}
+            </Picker>
+            <Picker
+              selectedValue={sortBy}
+              style={styles.picker}
+              onValueChange={(itemValue) => setSortBy(itemValue)}
+            >
+              <Picker.Item label="Sort by Title" value="title" />
+              <Picker.Item label="Sort by Rating" value="rating" />
+            </Picker>
+          </View>
+          <TouchableOpacity onPress={resetFilters} style={styles.resetButton}>
+            <Text style={styles.resetButtonText}>Reset</Text>
+          </TouchableOpacity>
+          <FlatList
+            data={filteredMovies}
+            renderItem={renderMovie}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={styles.list}
+          />
+        </View>
       )}
     </View>
   );
@@ -158,6 +243,59 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   backButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 18,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    marginTop: 20,
+  },
+  searchInput: {
+    flex: 1,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 8,
+    marginRight: 10,
+  },
+  picker: {
+    flex: 1,
+    height: 50,
+  },
+  resetButton: {
+    padding: 10,
+    backgroundColor: "#FF6347",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  resetButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  rentButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#28a745",
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  rentButtonText: {
     color: "#fff",
     fontSize: 16,
   },

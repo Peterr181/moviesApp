@@ -10,9 +10,9 @@ import { verifyToken } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 
 // Movies Routes
-router.get("/", verifyToken, getMovies); // List all movies with optional filters
-router.post("/", verifyToken, addMovie); // Add a new movie
-router.put("/:id", verifyToken, updateMovie); // Update movie details
-router.delete("/:id", verifyToken, deleteMovie); // Delete a movie
+router.get("/", getMovies); // List all movies with optional filters
+router.post("/", addMovie); // Add a new movie
+router.put("/:id", updateMovie); // Update movie details
+router.delete("/:id", deleteMovie); // Delete a movie
 
 export default router;

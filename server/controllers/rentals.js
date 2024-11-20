@@ -26,9 +26,13 @@ export const rentMovie = async (req, res) => {
 
   try {
     const client = await Client.findById(clientId);
-    if (!client) return handleError(res, 404, "Client not found");
+    if (!client)
+      return handleError(res, 404, `Client not found with ID: ${clientId}`);
 
-    const activeRentals = await Rental.find({ clientId, returnedAt: null });
+    const activeRentals = await Rental.find({
+      clientId,
+      actualReturnDate: null,
+    });
     if (activeRentals.length >= 3)
       return handleError(res, 400, "Client has reached the rental limit");
 
@@ -39,8 +43,8 @@ export const rentMovie = async (req, res) => {
     const rental = new Rental({
       clientId,
       movieId,
-      rentedAt: new Date(),
-      returnBy: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days later
+      rentalDate: new Date(),
+      returnDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days later
     });
 
     await rental.save();
@@ -61,11 +65,12 @@ export const returnMovie = async (req, res) => {
 
   try {
     const rental = await Rental.findById(rentalId);
-    if (!rental || rental.returnedAt)
+    if (!rental || rental.returned)
       return handleError(res, 404, "Rental not found or already returned");
 
     // Mark the rental as returned
-    rental.returnedAt = new Date();
+    rental.actualReturnDate = new Date();
+    rental.returned = true;
     await rental.save();
 
     // Mark the movie as available
@@ -75,7 +80,7 @@ export const returnMovie = async (req, res) => {
       await movie.save();
     }
 
-    return res.status(200).json({ message: "Movie returned successfully" });
+    return res.status(200).json(rental);
   } catch (err) {
     return handleError(res, 500, "Error processing return");
   }

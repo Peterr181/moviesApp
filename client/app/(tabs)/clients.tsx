@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ListRenderItem,
 } from "react-native";
+import useClientsStore from "../../hooks/useClientsStore";
 
 // Define the Client type
 type Client = {
@@ -18,37 +19,13 @@ type Client = {
   registrationDate: string;
 };
 
-// Przykładowe dane klientów
-const clients: Client[] = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    address: "123 Main St, Springfield",
-    phone: "123-456-789",
-    registrationDate: "2023-01-01",
-  },
-  {
-    id: "2",
-    firstName: "Jane",
-    lastName: "Smith",
-    address: "456 Elm St, Metropolis",
-    phone: "987-654-321",
-    registrationDate: "2022-10-15",
-  },
-  {
-    id: "3",
-    firstName: "Emily",
-    lastName: "Johnson",
-    address: "789 Oak St, Gotham",
-    phone: "555-555-555",
-    registrationDate: "2021-05-20",
-  },
-  // Dodaj więcej klientów, aby przetestować widok
-];
-
 export default function ClientsScreen() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const { clients, fetchClients } = useClientsStore();
+
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
 
   const renderClient: ListRenderItem<Client> = ({ item }) => (
     <TouchableOpacity

@@ -5,6 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define types for user profile
 interface UserProfile {
+  _id: string;
   username: string;
   role: string;
 }
@@ -19,10 +20,13 @@ interface GlobalContextType {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
+    address: string,
+    phone: string
   ) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  isAdmin: boolean;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -45,6 +49,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -73,6 +78,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         }
       );
       setUserProfile(response.data);
+      setIsAdmin(response.data.role === "admin");
     } catch (err) {
       setError("Error fetching user profile");
       console.error(err);
@@ -83,7 +89,9 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
+    address: string,
+    phone: string
   ) => {
     setLoading(true);
     setError(null);
@@ -94,6 +102,10 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
           email,
           username: `${firstName} ${lastName}`,
           password,
+          firstName,
+          lastName,
+          address,
+          phone,
         }
       );
       if (response.data.token) {
@@ -152,6 +164,7 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         signUp,
         signIn,
         signOut,
+        isAdmin,
       }}
     >
       {children}

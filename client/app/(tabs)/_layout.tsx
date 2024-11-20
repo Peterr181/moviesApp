@@ -2,10 +2,12 @@ import { Stack } from "expo-router";
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeIcon, MoviesIcon, UsersIcon } from "../../constants/icons";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const Tab = createBottomTabNavigator();
 
 export default function TabLayout() {
+  const { isAdmin } = useGlobalContext();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -50,10 +52,32 @@ export default function TabLayout() {
           </Stack>
         )}
       </Tab.Screen>
+
+      {isAdmin && (
+        <Tab.Screen
+          name="Clients"
+          options={{
+            title: "Clients",
+            tabBarIcon: ({ color, size }) => (
+              <UsersIcon color={color} size={size} />
+            ),
+          }}
+        >
+          {() => (
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="clients" options={{ title: "Clients" }} />
+            </Stack>
+          )}
+        </Tab.Screen>
+      )}
       <Tab.Screen
-        name="Clients"
+        name="Rentals"
         options={{
-          title: "Clients",
+          title: "Rentals",
           tabBarIcon: ({ color, size }) => (
             <UsersIcon color={color} size={size} />
           ),
@@ -65,7 +89,7 @@ export default function TabLayout() {
               headerShown: false,
             }}
           >
-            <Stack.Screen name="clients" options={{ title: "Clients" }} />
+            <Stack.Screen name="rentals" options={{ title: "Rentals" }} />
           </Stack>
         )}
       </Tab.Screen>

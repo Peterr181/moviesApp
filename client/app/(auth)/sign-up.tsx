@@ -9,10 +9,12 @@ export default function SignUpScreen() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [address, setAddress] = useState(""); // New state for address
+  const [phone, setPhone] = useState(""); // New state for phone
   const { signUp, loading, error } = useGlobalContext(); // Access signUp and loading from context
 
   const handleSignUp = () => {
-    signUp(firstName, lastName, email, password); // Call signUp from context
+    signUp(firstName, lastName, email, password, address, phone); // Call signUp from context with new fields
   };
 
   return (
@@ -43,6 +45,18 @@ export default function SignUpScreen() {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Address" // New input for address
+        value={address}
+        onChangeText={setAddress}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Phone" // New input for phone
+        value={phone}
+        onChangeText={setPhone}
       />
       {error && <Text style={styles.error}>{error}</Text>}
       <Button title="Sign Up" onPress={handleSignUp} disabled={loading} />

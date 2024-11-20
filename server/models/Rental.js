@@ -22,6 +22,10 @@ const rentalSchema = new mongoose.Schema({
   actualReturnDate: {
     type: Date, // Null if not yet returned
   },
+  returned: {
+    type: Boolean,
+    default: false, // Initially false
+  },
 });
 
 const Rental = mongoose.model("Rental", rentalSchema);

@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Client from "../models/Client.js"; // Import Client model
 
 const saltRounds = 10;
 
@@ -9,10 +10,19 @@ const handleError = (res, status, message) => {
 };
 
 export const signup = async (req, res) => {
-  const { email, username, password } = req.body;
+  const { email, username, password, firstName, lastName, address, phone } =
+    req.body;
 
   try {
-    console.log("Signup request received:", { email, username, password });
+    console.log("Signup request received:", {
+      email,
+      username,
+      password,
+      firstName,
+      lastName,
+      address,
+      phone,
+    });
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -31,6 +41,18 @@ export const signup = async (req, res) => {
 
     const savedUser = await newUser.save();
     console.log("User saved successfully:", savedUser);
+
+    const newClient = new Client({
+      _id: savedUser._id, // Set the client ID to be the same as the user ID
+      firstName,
+      lastName,
+      email,
+      address,
+      phone,
+    });
+
+    const savedClient = await newClient.save();
+    console.log("Client saved successfully:", savedClient);
 
     const token = jwt.sign(
       { id: savedUser._id, username: savedUser.username },
