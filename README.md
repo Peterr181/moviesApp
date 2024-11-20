@@ -45,5 +45,7 @@ This project simulates a video rental system using a NoSQL database. It offers f
   - Preventing the deletion of films that are currently rented.
   - Ensuring a customer cannot be deleted if they have active rentals.
   - Other validation checks to ensure data consistency and prevent improper operations.
+ 
+This app was created for my uni subject purposes.
 
 
